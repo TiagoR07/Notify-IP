@@ -55,13 +55,13 @@ pip install discord.py python-dotenv psutil requests
 
 ### 4) Configure Credentials
 
-The repository includes a dummy .env file. You must edit this file with your actual Discord credentials:
+Create a .env file:
 
 ```bash
 nano .env
 ```
 
-Update the fields with your specific information:
+Update the fields with your actual Discord credentials:
 
 ```bash
 DISCORD_TOKEN=your_bot_token_here
