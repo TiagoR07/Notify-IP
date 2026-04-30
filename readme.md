@@ -86,6 +86,22 @@ The project includes a `setup.sh` script to automate the creation of the systemd
 chmod +x setup.sh
 ```
 
+### Review and edit paths
+Open the script and ensure the following variables match your system:
+```
+SCRIPT_PATH="/home/pi/main.py"
+PYTHON_PATH="/usr/bin/python3"
+```
+
+Make sure:
+
+- `SCRIPT_PATH` points to your actual script location
+- `PYTHON_PATH` matches your Python virtual environment path
+
+```bash
+nano setup.sh
+```
+
 ### Run it
 
 ```bash

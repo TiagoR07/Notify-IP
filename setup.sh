@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Path to your Python script
-SCRIPT_PATH="/home/pi/notify_ip.py"
+SCRIPT_PATH="/home/pi/main.py"
 PYTHON_PATH="/usr/bin/python3"
 SERVICE_NAME="ip-discord.service"
 
