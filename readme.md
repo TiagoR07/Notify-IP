@@ -89,8 +89,9 @@ chmod +x setup.sh
 ### Review and edit paths
 Open the script and ensure the following variables match your system:
 ```
-SCRIPT_PATH="/home/pi/main.py"
-PYTHON_PATH="/usr/bin/python3"
+PROJECT_DIR="$(pwd)"
+SCRIPT_PATH="$PROJECT_DIR/main.py"
+VENV_PATH="$PROJECT_DIR/venv"
 ```
 
 Make sure:
