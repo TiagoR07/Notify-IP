@@ -25,7 +25,7 @@ async def handle_command(cmd, message):
     # =========================
     # RESTART
     # =========================
-    elif cmd == "restart":
+    elif cmd in ("restart", "reboot"):
         if IS_WINDOWS:
             return "❌ Restart is only available on Linux / Raspberry Pi."
 

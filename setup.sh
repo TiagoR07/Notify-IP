@@ -45,4 +45,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable $SERVICE_NAME
 sudo systemctl restart $SERVICE_NAME
 
-echo "Setup complete."
+echo "Setup complete. The service has been enabled and started."
