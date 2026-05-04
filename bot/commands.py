@@ -10,7 +10,7 @@ async def handle_command(cmd, message):
     # SYSTEM INFO
     # =========================
     if cmd == "system info":
-        return f"📊 System Info:\n{get_system_info()}"
+        return f"{get_system_info()}"
 
     # =========================
     # SHUTDOWN
