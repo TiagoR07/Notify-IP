@@ -1,16 +1,25 @@
+import asyncio
 import subprocess
 import shutil
+from typing import Union
 
 from config import IS_WINDOWS
 from system_info import get_system_info
 
 
-async def handle_command(cmd, message):
+async def _send_intermediate(source: Union["discord.Message", "discord.Interaction"], message: str):
+    if hasattr(source, "channel"):
+        await source.channel.send(message)
+    else:
+        await source.followup.send(message)
+
+
+async def handle_command(cmd: str, source: Union["discord.Message", "discord.Interaction"]):
     # =========================
     # SYSTEM INFO
     # =========================
     if cmd == "system info":
-        return f"{get_system_info()}"
+        return get_system_info()
 
     # =========================
     # SHUTDOWN
@@ -19,7 +28,7 @@ async def handle_command(cmd, message):
         if IS_WINDOWS:
             return "❌ Shutdown is only available on Linux / Raspberry Pi."
 
-        subprocess.Popen(["sudo", "shutdown", "now"])
+        await asyncio.to_thread(subprocess.Popen, ["sudo", "shutdown", "now"])
         return "🛑 Shutting down the Raspberry Pi..."
 
     # =========================
@@ -29,7 +38,7 @@ async def handle_command(cmd, message):
         if IS_WINDOWS:
             return "❌ Restart is only available on Linux / Raspberry Pi."
 
-        subprocess.Popen(["sudo", "reboot"])
+        await asyncio.to_thread(subprocess.Popen, ["sudo", "reboot"])
         return "🔄 Restarting the Raspberry Pi..."
 
     # =========================
@@ -39,19 +48,22 @@ async def handle_command(cmd, message):
         if IS_WINDOWS:
             return "❌ Update via `apt` is only available on Linux / Raspberry Pi."
 
-        await message.channel.send(
+        await _send_intermediate(
+            source,
             "🔄 Running `sudo apt update && sudo apt upgrade -y`...\nThis might take a while ⏳"
         )
 
         try:
-            update_result = subprocess.run(
+            update_result = await asyncio.to_thread(
+                subprocess.run,
                 ["sudo", "apt", "update"],
                 capture_output=True,
                 text=True,
                 timeout=800,
             )
 
-            upgrade_result = subprocess.run(
+            upgrade_result = await asyncio.to_thread(
+                subprocess.run,
                 ["sudo", "apt", "upgrade", "-y"],
                 capture_output=True,
                 text=True,
@@ -60,7 +72,6 @@ async def handle_command(cmd, message):
 
             combined_output = update_result.stdout + "\n" + upgrade_result.stdout
 
-            # last 30 lines (clean output)
             last_lines = "\n".join(combined_output.strip().splitlines()[-30:])
 
             return f"✅ Update finished:\n```{last_lines}```"
@@ -82,7 +93,8 @@ async def handle_command(cmd, message):
                     f"Free: {free // (2**30)} GB"
                 )
 
-            result = subprocess.run(
+            result = await asyncio.to_thread(
+                subprocess.run,
                 ["df", "-hT", "--exclude-type=tmpfs", "--exclude-type=devtmpfs"],
                 capture_output=True,
                 text=True,
@@ -105,6 +117,34 @@ async def handle_command(cmd, message):
             return f"❌ Could not get disk usage: {e}"
 
     # =========================
+    # SPEEDTEST
+    # =========================
+    elif cmd == "speedtest":
+        if not shutil.which("speedtest"):
+            return "❌ `speedtest-cli` is not installed on this machine.\nInstall it with: `sudo apt install speedtest-cli`"
+
+        await _send_intermediate(
+            source,
+            "📡 Running speed test... This might take a while ⏳"
+        )
+
+        try:
+            result = await asyncio.to_thread(
+                subprocess.run,
+                ["speedtest", "--simple"],
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
+
+            return f"📡 Speed Test Results:\n```{result.stdout}```"
+
+        except subprocess.TimeoutExpired:
+            return "❌ Speed test timed out after 3 minutes. Try again later."
+        except Exception as e:
+            return f"❌ Error while running speed test: {e}"
+
+    # =========================
     # HELP
     # =========================
     elif cmd == "help":
@@ -112,6 +152,7 @@ async def handle_command(cmd, message):
             "Here are the commands you can use:\n"
             "`system info`: Get system information.\n"
             "`disk usage`: Show disk usage.\n"
+            "`speedtest`: Run an internet speed test.\n"
             "`update`: Update the system packages.\n"
             "`shutdown`: Shut down the Raspberry Pi.\n"
             "`restart`: Restart the Raspberry Pi.\n"

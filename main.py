@@ -1,18 +1,27 @@
 import asyncio
+import logging
 import sys
 
 import discord
+from discord import app_commands
 
 from config import TOKEN, USER_ID, IS_WINDOWS
 from network import wait_for_dns, get_ip
 from system_info import get_cpu_temp
 from bot.commands import handle_command
+from bot.decorators import authorized_only
+
+logger = logging.getLogger(__name__)
 
 
 class MyClient(discord.Client):
 
+    def __init__(self, *, intents: discord.Intents):
+        super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)
+
     async def on_ready(self):
-        print(f"Logged in as {self.user}")
+        logger.info(f"Logged in as {self.user}")
 
         try:
             user = await self.fetch_user(USER_ID)
@@ -20,10 +29,10 @@ class MyClient(discord.Client):
             await user.send(
                 f"🔌 Hey <@{USER_ID}>! Your Raspberry Pi is online!\n"
                 f"🌐 IP Address: `{ip}`\n"
-                f"💬 Send `shutdown`, `restart`, `update`, `system info`, `disk usage`, or `speedtest` to this DM."
+                f"💬 You can use slash commands (try `/system_info`) — slash commands give autocomplete. `!`-prefixed commands still work as a fallback."
             )
         except Exception as e:
-            print(f"Failed to send startup DM: {e}")
+            logger.error(f"Failed to send startup DM: {e}")
 
         self.loop.create_task(self.monitor())
 
@@ -36,7 +45,7 @@ class MyClient(discord.Client):
                 try:
                     user = await self.fetch_user(USER_ID)
                     await user.send(f"⚠️ High CPU temp: {temp:.1f}°C")
-                except:
+                except discord.HTTPException:
                     pass
 
             await asyncio.sleep(60)
@@ -45,11 +54,41 @@ class MyClient(discord.Client):
         if message.author.id != USER_ID:
             return
 
-        cmd = message.content.lower().strip()
+        content = message.content.strip()
+
+        if not content.startswith("!"):
+            return
+
+        cmd = content[1:].lower().strip()
         result = await handle_command(cmd, message)
 
         if result:
             await message.channel.send(result)
+
+    async def setup_hook(self) -> None:
+        commands = [
+            ("system_info", "Get system information", "system info"),
+            ("shutdown", "Shutdown the Raspberry Pi", "shutdown"),
+            ("restart", "Restart the Raspberry Pi", "restart"),
+            ("update", "Update system packages (apt)", "update"),
+            ("disk_usage", "Show disk usage", "disk usage"),
+            ("speedtest", "Run an internet speed test", "speedtest"),
+            ("help", "Show available commands", "help"),
+        ]
+
+        for name, description, cmd in commands:
+            @self.tree.command(name=name, description=description)
+            @authorized_only
+            async def _command(interaction: discord.Interaction, _cmd=cmd):
+                await interaction.response.defer()
+                result = await handle_command(_cmd, interaction)
+                if result:
+                    await interaction.followup.send(result)
+
+        try:
+            await self.tree.sync()
+        except discord.HTTPException:
+            pass
 
 
 async def main():
@@ -64,10 +103,10 @@ async def main():
     try:
         await client.start(TOKEN)
     except discord.LoginFailure:
-        print("❌ Invalid token")
+        logger.error("Invalid token")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Bot crashed: {e}")
+        logger.error(f"Bot crashed: {e}")
         sys.exit(1)
 
 

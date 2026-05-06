@@ -1,6 +1,13 @@
+import logging
 import os
 import platform
 from dotenv import load_dotenv
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -16,6 +23,6 @@ if not USER_ID_RAW.isdigit():
 USER_ID = int(USER_ID_RAW)
 IS_WINDOWS = platform.system() == "Windows"
 
-print("Bot starting...")
-print(f"Platform: {platform.system()}")
-print(f"User ID: {USER_ID}")
+logger.info("Bot starting...")
+logger.info(f"Platform: {platform.system()}")
+logger.info(f"User ID: {USER_ID}")

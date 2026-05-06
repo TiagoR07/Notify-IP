@@ -9,7 +9,7 @@ def get_cpu_temp():
     try:
         with open("/sys/class/thermal/thermal_zone0/temp") as f:
             return float(f.read()) / 1000
-    except:
+    except (OSError, ValueError, IOError):
         return None
 
 
