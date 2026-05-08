@@ -3,7 +3,7 @@ import subprocess
 import shutil
 from typing import Union
 
-from config import IS_WINDOWS
+from config import IS_WINDOWS, APT_UPDATE_TIMEOUT, APT_UPGRADE_TIMEOUT, SPEEDTEST_TIMEOUT
 from system_info import get_system_info
 
 
@@ -59,7 +59,7 @@ async def handle_command(cmd: str, source: Union["discord.Message", "discord.Int
                 ["sudo", "apt", "update"],
                 capture_output=True,
                 text=True,
-                timeout=800,
+                timeout=APT_UPDATE_TIMEOUT,
             )
 
             upgrade_result = await asyncio.to_thread(
@@ -67,7 +67,7 @@ async def handle_command(cmd: str, source: Union["discord.Message", "discord.Int
                 ["sudo", "apt", "upgrade", "-y"],
                 capture_output=True,
                 text=True,
-                timeout=2000,
+                timeout=APT_UPGRADE_TIMEOUT,
             )
 
             combined_output = update_result.stdout + "\n" + upgrade_result.stdout
@@ -76,7 +76,7 @@ async def handle_command(cmd: str, source: Union["discord.Message", "discord.Int
 
             return f"✅ Update finished:\n```{last_lines}```"
 
-        except Exception as e:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
             return f"❌ Error while updating: {e}"
 
     # =========================
@@ -113,7 +113,7 @@ async def handle_command(cmd: str, source: Union["discord.Message", "discord.Int
 
             return f"💽 Disk Usage:\n```{output}```"
 
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, shutil.Error) as e:
             return f"❌ Could not get disk usage: {e}"
 
     # =========================
@@ -134,14 +134,14 @@ async def handle_command(cmd: str, source: Union["discord.Message", "discord.Int
                 ["speedtest", "--simple"],
                 capture_output=True,
                 text=True,
-                timeout=180,
+                timeout=SPEEDTEST_TIMEOUT,
             )
 
             return f"📡 Speed Test Results:\n```{result.stdout}```"
 
         except subprocess.TimeoutExpired:
             return "❌ Speed test timed out after 3 minutes. Try again later."
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError) as e:
             return f"❌ Error while running speed test: {e}"
 
     # =========================

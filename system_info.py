@@ -3,7 +3,7 @@ from config import IS_WINDOWS
 from network import get_ip
 
 
-def get_cpu_temp():
+def get_cpu_temp() -> float | None:
     if IS_WINDOWS:
         return None
     try:
@@ -13,7 +13,7 @@ def get_cpu_temp():
         return None
 
 
-def get_system_info():
+def get_system_info() -> str:
     temp = get_cpu_temp()
     cpu_percent = psutil.cpu_percent()
     ram = psutil.virtual_memory()

@@ -50,7 +50,7 @@ source venv/bin/activate
 ### 3) Install dependencies
 
 ```bash
-python -m pip install discord.py python-dotenv psutil requests
+python -m pip install requirements.txt
 ```
 
 ### 4) Configure Credentials

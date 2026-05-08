@@ -26,3 +26,11 @@ IS_WINDOWS = platform.system() == "Windows"
 logger.info("Bot starting...")
 logger.info(f"Platform: {platform.system()}")
 logger.info(f"User ID: {USER_ID}")
+
+# Constants
+CPU_TEMP_WARNING_THRESHOLD = 75  # Celsius
+DNS_RETRY_COUNT = 10
+DNS_RETRY_DELAY = 3  # seconds
+APT_UPDATE_TIMEOUT = 800  # seconds
+APT_UPGRADE_TIMEOUT = 2000  # seconds
+SPEEDTEST_TIMEOUT = 180  # seconds

@@ -5,7 +5,7 @@ import sys
 import discord
 from discord import app_commands
 
-from config import TOKEN, USER_ID, IS_WINDOWS
+from config import TOKEN, USER_ID, IS_WINDOWS, CPU_TEMP_WARNING_THRESHOLD
 from network import wait_for_dns, get_ip
 from system_info import get_cpu_temp
 from bot.commands import handle_command
@@ -41,12 +41,12 @@ class MyClient(discord.Client):
 
         while not self.is_closed():
             temp = get_cpu_temp()
-            if temp and temp > 75:
+            if temp and temp > CPU_TEMP_WARNING_THRESHOLD:
                 try:
                     user = await self.fetch_user(USER_ID)
                     await user.send(f"⚠️ High CPU temp: {temp:.1f}°C")
-                except discord.HTTPException:
-                    pass
+                except discord.HTTPException as e:
+                    logger.warning(f"Failed to send temp warning: {e}")
 
             await asyncio.sleep(60)
 
@@ -76,19 +76,22 @@ class MyClient(discord.Client):
             ("help", "Show available commands", "help"),
         ]
 
-        for name, description, cmd in commands:
-            @self.tree.command(name=name, description=description)
+        def make_command_handler(cmd: str):
             @authorized_only
-            async def _command(interaction: discord.Interaction, _cmd=cmd):
+            async def handler(interaction: discord.Interaction):
                 await interaction.response.defer()
-                result = await handle_command(_cmd, interaction)
+                result = await handle_command(cmd, interaction)
                 if result:
                     await interaction.followup.send(result)
+            return handler
+
+        for name, description, cmd in commands:
+            self.tree.command(name=name, description=description)(make_command_handler(cmd))
 
         try:
             await self.tree.sync()
-        except discord.HTTPException:
-            pass
+        except discord.HTTPException as e:
+            logger.warning(f"Failed to sync commands: {e}")
 
 
 async def main():
