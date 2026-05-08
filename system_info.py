@@ -4,6 +4,11 @@ from network import get_ip
 
 
 def get_cpu_temp() -> float | None:
+    """Get the current CPU temperature.
+
+    Returns:
+        CPU temperature in Celsius, or None if unavailable (e.g., on Windows).
+    """
     if IS_WINDOWS:
         return None
     try:
@@ -14,6 +19,12 @@ def get_cpu_temp() -> float | None:
 
 
 def get_system_info() -> str:
+    """Get formatted system information.
+
+    Returns:
+        A formatted string containing CPU temperature, CPU load, RAM usage,
+        disk usage, and IP address.
+    """
     temp = get_cpu_temp()
     cpu_percent = psutil.cpu_percent()
     ram = psutil.virtual_memory()

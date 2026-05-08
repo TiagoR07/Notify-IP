@@ -3,3 +3,4 @@
 .env2
 /bot/__pycache__
 /venv
+/tests/__pycache__

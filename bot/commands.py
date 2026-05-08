@@ -7,14 +7,29 @@ from config import IS_WINDOWS, APT_UPDATE_TIMEOUT, APT_UPGRADE_TIMEOUT, SPEEDTES
 from system_info import get_system_info
 
 
-async def _send_intermediate(source: Union["discord.Message", "discord.Interaction"], message: str):
+async def _send_intermediate(source: Union["discord.Message", "discord.Interaction"], message: str) -> None:
+    """Send an intermediate message during command execution.
+
+    Args:
+        source: The Discord message or interaction to respond to.
+        message: The message to send.
+    """
     if hasattr(source, "channel"):
         await source.channel.send(message)
     else:
         await source.followup.send(message)
 
 
-async def handle_command(cmd: str, source: Union["discord.Message", "discord.Interaction"]):
+async def handle_command(cmd: str, source: Union["discord.Message", "discord.Interaction"]) -> str | None:
+    """Handle a bot command and return the response.
+
+    Args:
+        cmd: The command string to execute.
+        source: The Discord message or interaction that triggered the command.
+
+    Returns:
+        The response message, or None if no response is needed.
+    """
     # =========================
     # SYSTEM INFO
     # =========================

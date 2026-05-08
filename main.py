@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+from typing import Callable, Awaitable
 
 import discord
 from discord import app_commands
@@ -15,12 +16,22 @@ logger = logging.getLogger(__name__)
 
 
 class MyClient(discord.Client):
+    """Discord bot client for system monitoring and control."""
 
     def __init__(self, *, intents: discord.Intents):
+        """Initialize the Discord client.
+
+        Args:
+            intents: Discord intents for the bot.
+        """
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
+        """Handle the bot ready event.
+
+        Sends a startup DM with the IP address and starts monitoring.
+        """
         logger.info(f"Logged in as {self.user}")
 
         try:
@@ -36,7 +47,11 @@ class MyClient(discord.Client):
 
         self.loop.create_task(self.monitor())
 
-    async def monitor(self):
+    async def monitor(self) -> None:
+        """Monitor CPU temperature and send warnings if it exceeds the threshold.
+
+        Checks temperature every 60 seconds.
+        """
         await self.wait_until_ready()
 
         while not self.is_closed():
@@ -50,7 +65,14 @@ class MyClient(discord.Client):
 
             await asyncio.sleep(60)
 
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message) -> None:
+        """Handle incoming messages.
+
+        Processes commands prefixed with '!' from the authorized user.
+
+        Args:
+            message: The Discord message to process.
+        """
         if message.author.id != USER_ID:
             return
 
@@ -66,6 +88,10 @@ class MyClient(discord.Client):
             await message.channel.send(result)
 
     async def setup_hook(self) -> None:
+        """Set up slash commands and sync them with Discord.
+
+        Registers all available commands and syncs them with Discord's API.
+        """
         commands = [
             ("system_info", "Get system information", "system info"),
             ("shutdown", "Shutdown the Raspberry Pi", "shutdown"),
@@ -76,9 +102,17 @@ class MyClient(discord.Client):
             ("help", "Show available commands", "help"),
         ]
 
-        def make_command_handler(cmd: str):
+        def make_command_handler(cmd: str) -> Callable[[discord.Interaction], Awaitable[None]]:
+            """Create a command handler for a specific command.
+
+            Args:
+                cmd: The command string to execute.
+
+            Returns:
+                An async handler function for the command.
+            """
             @authorized_only
-            async def handler(interaction: discord.Interaction):
+            async def handler(interaction: discord.Interaction) -> None:
                 await interaction.response.defer()
                 result = await handle_command(cmd, interaction)
                 if result:
@@ -95,6 +129,10 @@ class MyClient(discord.Client):
 
 
 async def main():
+    """Main entry point for the Discord bot.
+
+    Waits for DNS resolution, initializes the client, and starts the bot.
+    """
     await wait_for_dns()
 
     intents = discord.Intents.all()
