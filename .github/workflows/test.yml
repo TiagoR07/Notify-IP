@@ -10,8 +10,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-      DISCORD_USER_ID: ${{ secrets.DISCORD_USER_ID }}
+      DISCORD_TOKEN: test_token
+      DISCORD_USER_ID: 123456789
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
