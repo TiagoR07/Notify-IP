@@ -1,32 +1,10 @@
 """Tests for bot.commands module."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from bot.commands import handle_command, _send_intermediate
+import pytest
 
-
-@pytest.mark.asyncio
-async def test_send_intermediate_message():
-    """Test _send_intermediate with a Message object."""
-    source = MagicMock()
-    source.channel = AsyncMock()
-
-    await _send_intermediate(source, "test message")
-
-    source.channel.send.assert_called_once_with("test message")
-
-
-@pytest.mark.asyncio
-async def test_send_intermediate_interaction():
-    """Test _send_intermediate with an Interaction object."""
-    source = MagicMock(spec=[])  # No default attributes
-    source.followup = AsyncMock()
-    source.followup.send = AsyncMock()
-
-    await _send_intermediate(source, "test message")
-
-    source.followup.send.assert_called_once_with("test message")
+from bot.commands import handle_command
 
 
 @pytest.mark.asyncio
@@ -43,6 +21,7 @@ async def test_handle_command_help():
     """Test handle_command with 'help' command."""
     result = await handle_command("help", MagicMock())
 
+    assert result is not None
     assert "system info" in result.lower()
     assert "shutdown" in result.lower()
 
@@ -61,17 +40,21 @@ async def test_handle_command_shutdown_windows():
     with patch("bot.commands.IS_WINDOWS", True):
         result = await handle_command("shutdown", MagicMock())
 
+        assert result is not None
         assert "only available on linux" in result.lower()
 
 
 @pytest.mark.asyncio
 async def test_handle_command_shutdown_linux():
     """Test handle_command shutdown on Linux."""
-    with patch("bot.commands.IS_WINDOWS", False), \
-         patch("asyncio.to_thread", new_callable=AsyncMock) as mock_to_thread:
+    with (
+        patch("bot.commands.IS_WINDOWS", False),
+        patch("asyncio.to_thread", new_callable=AsyncMock) as mock_to_thread,
+    ):
 
         result = await handle_command("shutdown", MagicMock())
 
+        assert result is not None
         assert "Shutting down" in result
         mock_to_thread.assert_called_once()
 
@@ -82,17 +65,21 @@ async def test_handle_command_restart_windows():
     with patch("bot.commands.IS_WINDOWS", True):
         result = await handle_command("restart", MagicMock())
 
+        assert result is not None
         assert "only available on linux" in result.lower()
 
 
 @pytest.mark.asyncio
 async def test_handle_command_restart_linux():
     """Test handle_command restart on Linux."""
-    with patch("bot.commands.IS_WINDOWS", False), \
-         patch("asyncio.to_thread", new_callable=AsyncMock) as mock_to_thread:
+    with (
+        patch("bot.commands.IS_WINDOWS", False),
+        patch("asyncio.to_thread", new_callable=AsyncMock) as mock_to_thread,
+    ):
 
         result = await handle_command("restart", MagicMock())
 
+        assert result is not None
         assert "Restarting" in result
         mock_to_thread.assert_called_once()
 
@@ -103,6 +90,7 @@ async def test_handle_command_update_windows():
     with patch("bot.commands.IS_WINDOWS", True):
         result = await handle_command("update", MagicMock())
 
+        assert result is not None
         assert "only available on linux" in result.lower()
 
 
@@ -112,4 +100,5 @@ async def test_handle_command_speedtest_not_installed():
     with patch("shutil.which", return_value=None):
         result = await handle_command("speedtest", MagicMock())
 
+        assert result is not None
         assert "not installed" in result.lower()

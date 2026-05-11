@@ -1,4 +1,5 @@
 import psutil
+
 from config import IS_WINDOWS
 from network import get_ip
 
@@ -14,7 +15,7 @@ def get_cpu_temp() -> float | None:
     try:
         with open("/sys/class/thermal/thermal_zone0/temp") as f:
             return float(f.read()) / 1000
-    except (OSError, ValueError, IOError):
+    except (OSError, ValueError):
         return None
 
 
@@ -28,7 +29,7 @@ def get_system_info() -> str:
     temp = get_cpu_temp()
     cpu_percent = psutil.cpu_percent()
     ram = psutil.virtual_memory()
-    disk = psutil.disk_usage('/')
+    disk = psutil.disk_usage("/")
     ip = get_ip()
 
     temp_str = f"{temp:.1f}°C" if temp else "N/A"

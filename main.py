@@ -1,16 +1,25 @@
 import asyncio
 import logging
 import sys
-from typing import Callable, Awaitable
+from typing import Any
 
 import discord
 from discord import app_commands
 
-from config import TOKEN, USER_ID, IS_WINDOWS, CPU_TEMP_WARNING_THRESHOLD
-from network import wait_for_dns, get_ip
-from system_info import get_cpu_temp
 from bot.commands import handle_command
+from bot.constants import (
+    CMD_DISK_USAGE,
+    CMD_HELP,
+    CMD_RESTART,
+    CMD_SHUTDOWN,
+    CMD_SPEEDTEST,
+    CMD_SYSTEM_INFO,
+    CMD_UPDATE,
+)
 from bot.decorators import authorized_only
+from config import CPU_TEMP_WARNING_THRESHOLD, TOKEN, USER_ID
+from network import get_ip, wait_for_dns
+from system_info import get_cpu_temp
 
 logger = logging.getLogger(__name__)
 
@@ -93,16 +102,16 @@ class MyClient(discord.Client):
         Registers all available commands and syncs them with Discord's API.
         """
         commands = [
-            ("system_info", "Get system information", "system info"),
-            ("shutdown", "Shutdown the Raspberry Pi", "shutdown"),
-            ("restart", "Restart the Raspberry Pi", "restart"),
-            ("update", "Update system packages (apt)", "update"),
-            ("disk_usage", "Show disk usage", "disk usage"),
-            ("speedtest", "Run an internet speed test", "speedtest"),
-            ("help", "Show available commands", "help"),
+            ("system_info", "Get system information", CMD_SYSTEM_INFO),
+            ("shutdown", "Shutdown the Raspberry Pi", CMD_SHUTDOWN),
+            ("restart", "Restart the Raspberry Pi", CMD_RESTART),
+            ("update", "Update system packages (apt)", CMD_UPDATE),
+            ("disk_usage", "Show disk usage", CMD_DISK_USAGE),
+            ("speedtest", "Run an internet speed test", CMD_SPEEDTEST),
+            ("help", "Show available commands", CMD_HELP),
         ]
 
-        def make_command_handler(cmd: str) -> Callable[[discord.Interaction], Awaitable[None]]:
+        def make_command_handler(cmd: str):
             """Create a command handler for a specific command.
 
             Args:
@@ -111,12 +120,14 @@ class MyClient(discord.Client):
             Returns:
                 An async handler function for the command.
             """
+
             @authorized_only
-            async def handler(interaction: discord.Interaction) -> None:
+            async def handler(interaction: discord.Interaction[Any]) -> None:
                 await interaction.response.defer()
                 result = await handle_command(cmd, interaction)
                 if result:
                     await interaction.followup.send(result)
+
             return handler
 
         for name, description, cmd in commands:

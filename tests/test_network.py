@@ -1,8 +1,9 @@
 """Tests for network module."""
 
-import pytest
-from unittest.mock import patch, MagicMock
 import socket
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from network import get_ip, wait_for_dns
 
