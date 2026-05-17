@@ -9,6 +9,8 @@ CMD_UPDATE = "update"
 CMD_DISK_USAGE = "disk usage"
 CMD_SPEEDTEST = "speedtest"
 CMD_HELP = "help"
+CMD_FIX_PERMS = "fix_permissions"
+CMD_RESTART_AVAHI = "restart avahi"
 
 # Command aliases
 CMD_RESTART_ALIASES = {CMD_RESTART, CMD_REBOOT}
@@ -22,6 +24,8 @@ HELP_MESSAGE = (
     "`update`: Update the system packages.\n"
     "`shutdown`: Shut down the Raspberry Pi.\n"
     "`restart`: Restart the Raspberry Pi.\n"
+    "`fix_permissions`: Recursively restore ownership of /home/tiago.\n"
+    "`restart avahi`: Restart the avahi-daemon service.\n"
 )
 
 # Error messages
@@ -35,6 +39,8 @@ ERR_DISK_USAGE = "❌ Could not get disk usage: {error}"
 ERR_UPDATE = "❌ Error while updating: {error}"
 ERR_SPEEDTEST_ERROR = "❌ Error while running speed test: {error}"
 ERR_NOT_AUTHORIZED = "❌ Not authorized."
+ERR_FIX_PERMS = "❌ Error while fixing permissions: {error}"
+ERR_RESTART_AVAHI = "❌ Error while restarting avahi-daemon: {error}"
 
 # Success messages
 MSG_SHUTDOWN = "🛑 Shutting down the Raspberry Pi..."
@@ -49,3 +55,11 @@ MSG_DISK_USAGE = "💽 Disk Usage:\n```{output}```"
 MSG_DISK_USAGE_WINDOWS = (
     "💽 Disk Usage:\n" "Total: {total} GB\n" "Used: {used} GB\n" "Free: {free} GB"
 )
+MSG_FIX_PERMS_DONE = "✅ Ownership restored for /home/tiago"
+MSG_RESTART_AVAHI_DONE = "✅ avahi-daemon restarted successfully"
+
+# Logging messages
+LOG_UNAUTHORIZED_SLASH = "⚠️ [{timestamp}] UNAUTHORIZED: User '{user}' (ID: {user_id}) attempted command: /{command}"
+LOG_AUTHORIZED_SLASH = "✅ [{timestamp}] User '{user}' (ID: {user_id}) executed command: /{command}"
+LOG_UNAUTHORIZED_PREFIX = "⚠️ [{timestamp}] UNAUTHORIZED: User '{user}' (ID: {user_id}) attempted command: !{command}"
+LOG_AUTHORIZED_PREFIX = "✅ [{timestamp}] User '{user}' (ID: {user_id}) executed command: !{command}"

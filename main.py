@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+from datetime import datetime
 from typing import Any
 
 import discord
@@ -15,6 +16,10 @@ from bot.constants import (
     CMD_SPEEDTEST,
     CMD_SYSTEM_INFO,
     CMD_UPDATE,
+    CMD_FIX_PERMS,
+    CMD_RESTART_AVAHI,
+    LOG_UNAUTHORIZED_PREFIX,
+    LOG_AUTHORIZED_PREFIX,
 )
 from bot.decorators import authorized_only
 from config import CPU_TEMP_WARNING_THRESHOLD, TOKEN, USER_ID
@@ -82,7 +87,16 @@ class MyClient(discord.Client):
         Args:
             message: The Discord message to process.
         """
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        user = message.author
+
         if message.author.id != USER_ID:
+            content = message.content.strip()
+            if content.startswith("!"):
+                cmd = content[1:].lower().strip()
+                logger.warning(
+                    LOG_UNAUTHORIZED_PREFIX.format(timestamp=timestamp, user=user, user_id=user.id, command=cmd)
+                )
             return
 
         content = message.content.strip()
@@ -91,6 +105,9 @@ class MyClient(discord.Client):
             return
 
         cmd = content[1:].lower().strip()
+        logger.info(
+            LOG_AUTHORIZED_PREFIX.format(timestamp=timestamp, user=user, user_id=user.id, command=cmd)
+        )
         result = await handle_command(cmd, message)
 
         if result:
@@ -108,6 +125,8 @@ class MyClient(discord.Client):
             ("update", "Update system packages (apt)", CMD_UPDATE),
             ("disk_usage", "Show disk usage", CMD_DISK_USAGE),
             ("speedtest", "Run an internet speed test", CMD_SPEEDTEST),
+            ("fix_permissions", "Fix file permissions", CMD_FIX_PERMS),
+            ("restart_avahi", "Restart the avahi-daemon service", CMD_RESTART_AVAHI),
             ("help", "Show available commands", CMD_HELP),
         ]
 

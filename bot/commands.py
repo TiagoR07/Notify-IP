@@ -9,23 +9,30 @@ import discord
 
 from bot.constants import (
     CMD_DISK_USAGE,
+    CMD_FIX_PERMS,
     CMD_HELP,
     CMD_REBOOT,
     CMD_RESTART,
+    CMD_RESTART_AVAHI,
     CMD_SHUTDOWN,
     CMD_SPEEDTEST,
     CMD_SYSTEM_INFO,
     CMD_UPDATE,
     ERR_DISK_USAGE,
+    ERR_FIX_PERMS,
+    ERR_RESTART_AVAHI,
     ERR_SPEEDTEST_ERROR,
     ERR_SPEEDTEST_NOT_INSTALLED,
     ERR_SPEEDTEST_TIMEOUT,
     ERR_UPDATE,
     ERR_WINDOWS_ONLY,
+    ERR_NOT_AUTHORIZED,
     HELP_MESSAGE,
     MSG_DISK_USAGE,
     MSG_DISK_USAGE_WINDOWS,
+    MSG_FIX_PERMS_DONE,
     MSG_RESTART,
+    MSG_RESTART_AVAHI_DONE,
     MSG_SHUTDOWN,
     MSG_SPEEDTEST_RESULTS,
     MSG_SPEEDTEST_START,
@@ -214,6 +221,62 @@ async def _handle_help(_source: discord.Message | discord.Interaction) -> str:
     return HELP_MESSAGE
 
 
+async def _handle_fix_permissions(_source: discord.Message | discord.Interaction) -> str:
+    """Handle fix permissions command.
+
+    Args:
+        _source: The Discord message or interaction that triggered the command.
+
+    Returns:
+        The fix permissions result message.
+    """
+    try:
+        import os
+        import pwd
+
+        username = pwd.getpwuid(os.getuid()).pw_name
+        await asyncio.to_thread(
+            subprocess.run,
+            [
+                "sudo",
+                "chown",
+                "-R",
+                f"{username}:{username}",
+                f"/home/{username}",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=True,
+        )
+        return MSG_FIX_PERMS_DONE
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+        return ERR_FIX_PERMS.format(error=e)
+
+
+async def _handle_restart_avahi(_source: discord.Message | discord.Interaction) -> str:
+    """Handle restart avahi-daemon command.
+
+    Args:
+        _source: The Discord message or interaction that triggered the command.
+
+    Returns:
+        The restart avahi result message.
+    """
+    try:
+        await asyncio.to_thread(
+            subprocess.run,
+            ["sudo", "systemctl", "restart", "avahi-daemon"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+        return MSG_RESTART_AVAHI_DONE
+    except (subprocess.TimeoutExpired, subprocess.SubprocessError, OSError) as e:
+        return ERR_RESTART_AVAHI.format(error=e)
+
+
 # Command handler mapping
 _COMMAND_HANDLERS: dict[
     str,
@@ -227,6 +290,8 @@ _COMMAND_HANDLERS: dict[
     CMD_DISK_USAGE: _handle_disk_usage,
     CMD_SPEEDTEST: _handle_speedtest,
     CMD_HELP: _handle_help,
+    CMD_FIX_PERMS: _handle_fix_permissions,
+    CMD_RESTART_AVAHI: _handle_restart_avahi,
 }
 
 
