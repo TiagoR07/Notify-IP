@@ -8,10 +8,9 @@ import discord
 
 from bot.constants import (
     ERR_NOT_AUTHORIZED,
-    LOG_UNAUTHORIZED_SLASH,
     LOG_AUTHORIZED_SLASH,
+    LOG_UNAUTHORIZED_SLASH,
 )
-
 from config import USER_ID
 
 logger = logging.getLogger(__name__)

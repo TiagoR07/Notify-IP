@@ -10,16 +10,16 @@ from discord import app_commands
 from bot.commands import handle_command
 from bot.constants import (
     CMD_DISK_USAGE,
+    CMD_FIX_PERMS,
     CMD_HELP,
     CMD_RESTART,
+    CMD_RESTART_AVAHI,
     CMD_SHUTDOWN,
     CMD_SPEEDTEST,
     CMD_SYSTEM_INFO,
     CMD_UPDATE,
-    CMD_FIX_PERMS,
-    CMD_RESTART_AVAHI,
-    LOG_UNAUTHORIZED_PREFIX,
     LOG_AUTHORIZED_PREFIX,
+    LOG_UNAUTHORIZED_PREFIX,
 )
 from bot.decorators import authorized_only
 from config import CPU_TEMP_WARNING_THRESHOLD, TOKEN, USER_ID
