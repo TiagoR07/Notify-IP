@@ -95,7 +95,9 @@ class MyClient(discord.Client):
             if content.startswith("!"):
                 cmd = content[1:].lower().strip()
                 logger.warning(
-                    LOG_UNAUTHORIZED_PREFIX.format(timestamp=timestamp, user=user, user_id=user.id, command=cmd)
+                    LOG_UNAUTHORIZED_PREFIX.format(
+                        timestamp=timestamp, user=user, user_id=user.id, command=cmd
+                    )
                 )
             return
 
@@ -106,7 +108,9 @@ class MyClient(discord.Client):
 
         cmd = content[1:].lower().strip()
         logger.info(
-            LOG_AUTHORIZED_PREFIX.format(timestamp=timestamp, user=user, user_id=user.id, command=cmd)
+            LOG_AUTHORIZED_PREFIX.format(
+                timestamp=timestamp, user=user, user_id=user.id, command=cmd
+            )
         )
         result = await handle_command(cmd, message)
 

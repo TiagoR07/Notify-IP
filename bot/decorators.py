@@ -10,8 +10,8 @@ from bot.constants import (
     ERR_NOT_AUTHORIZED,
     LOG_UNAUTHORIZED_SLASH,
     LOG_AUTHORIZED_SLASH,
-    )
-    
+)
+
 from config import USER_ID
 
 logger = logging.getLogger(__name__)
@@ -37,13 +37,17 @@ def authorized_only(
 
         if interaction.user.id != USER_ID:
             logger.warning(
-                LOG_UNAUTHORIZED_SLASH.format(timestamp=timestamp, user=user, user_id=user.id, command=command_name)
+                LOG_UNAUTHORIZED_SLASH.format(
+                    timestamp=timestamp, user=user, user_id=user.id, command=command_name
+                )
             )
             await interaction.response.send_message(ERR_NOT_AUTHORIZED, ephemeral=True)
             return
 
         logger.info(
-            LOG_AUTHORIZED_SLASH.format(timestamp=timestamp, user=user, user_id=user.id, command=command_name)
+            LOG_AUTHORIZED_SLASH.format(
+                timestamp=timestamp, user=user, user_id=user.id, command=command_name
+            )
         )
         return await func(interaction, *args, **kwargs)
 

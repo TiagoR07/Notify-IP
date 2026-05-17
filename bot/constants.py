@@ -59,7 +59,13 @@ MSG_FIX_PERMS_DONE = "✅ Ownership restored for /home/tiago"
 MSG_RESTART_AVAHI_DONE = "✅ avahi-daemon restarted successfully"
 
 # Logging messages
-LOG_UNAUTHORIZED_SLASH = "⚠️ [{timestamp}] UNAUTHORIZED: User '{user}' (ID: {user_id}) attempted command: /{command}"
+LOG_UNAUTHORIZED_SLASH = (
+    "⚠️ [{timestamp}] UNAUTHORIZED: User '{user}' (ID: {user_id}) attempted command: /{command}"
+)
 LOG_AUTHORIZED_SLASH = "✅ [{timestamp}] User '{user}' (ID: {user_id}) executed command: /{command}"
-LOG_UNAUTHORIZED_PREFIX = "⚠️ [{timestamp}] UNAUTHORIZED: User '{user}' (ID: {user_id}) attempted command: !{command}"
-LOG_AUTHORIZED_PREFIX = "✅ [{timestamp}] User '{user}' (ID: {user_id}) executed command: !{command}"
+LOG_UNAUTHORIZED_PREFIX = (
+    "⚠️ [{timestamp}] UNAUTHORIZED: User '{user}' (ID: {user_id}) attempted command: !{command}"
+)
+LOG_AUTHORIZED_PREFIX = (
+    "✅ [{timestamp}] User '{user}' (ID: {user_id}) executed command: !{command}"
+)
